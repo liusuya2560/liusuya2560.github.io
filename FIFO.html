@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>先进先出法付款回款匹配与利息计算</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .data-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .data-table {
+            flex: 1;
+            min-width: 300px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f1f7fd;
+        }
+        
+        .payment {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .receipt {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .summary p {
+            margin: 8px 0;
+        }
+        
+        .interest-note {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>先进先出法付款回款匹配与利息计算</h1>
+        
+        <div class="controls">
+            <button id="processBtn">处理数据并计算</button>
+            <button id="resetBtn">重置</button>
+        </div>
+        
+        <div class="data-section">
+            <div class="data-table">
+                <h2>原始数据</h2>
+                <table id="originalData">
+                    <thead>
+                        <tr>
+                            <th>支付/回款日期</th>
+                            <th>款项性质</th>
+                            <th>支付金额</th>
+                            <th>回款金额</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="data-table">
+                <h2>匹配结果</h2>
+                <table id="matchedResults">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>付款日期</th>
+                            <th>回款日期</th>
+                            <th>款项性质</th>
+                            <th>匹配金额</th>
+                            <th>用款天数</th>
+                            <th>利息</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 匹配结果将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="summary" id="summary">
+            <!-- 汇总信息将通过JavaScript动态填充 -->
+        </div>
+        
+        <div class="interest-note">
+            <p><strong>利息计算说明：</strong></p>
+            <p>1. 利率：每月0.8%（默认每月30天，日利率 = 0.8% ÷ 30 ≈ 0.02667%）</p>
+            <p>2. 计息规则：不足20天按20天计算</p>
+            <p>3. 计算公式：利息 = 匹配金额 × 日利率 × 用款天数（若用款天数 < 20，则按20天计算）</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 财务匹配计算系统 | 基于先进先出法（FIFO）</p>
+        </div>
+    </div>
+
+    <script>
+        // 原始数据
+        const originalData = [
+            { date: '2025/11/28', type: '履约保证金', payment: 0, receipt: 1000000.00 },
+            { date: '2025/12/24', type: '货款', payment: 2851192.44, receipt: 0 },
+            { date: '2025/12/26', type: '货款', payment: 3488232.85, receipt: 0 },
+            { date: '2025/12/29', type: '货款', payment: 4086640.54, receipt: 0 },
+            { date: '2025/12/30', type: '货款', payment: 3483495.85, receipt: 0 },
+            { date: '2026/1/4', type: '港杂费包干费换单费', payment: 548500.00, receipt: 0 },
+            { date: '2026/1/5', type: '货款', payment: 7900379.66, receipt: 0 },
+            { date: '2026/1/5', type: '履约保证金', payment: 1000000.00, receipt: 0 },
+            { date: '2026/1/19', type: '货款', payment: 0, receipt: 12270454.92 },
+            { date: '2026/1/27', type: '货款', payment: 2900000.00, receipt: 0 },
+            { date: '2026/1/28', type: '港杂费包干费换单费', payment: 19492.72, receipt: 0 },
+            { date: '2026/1/28', type: '货款', payment: 0, receipt: 10990000 },
+            { date: '2026/1/29', type: '货款', payment: 0, receipt: 6416450.98 }
+        ];
+
+        // 利率参数
+        const MONTHLY_RATE = 0.008; // 每月0.8%
+        const DAYS_PER_MONTH = 30;
+        const DAILY_RATE = MONTHLY_RATE / DAYS_PER_MONTH;
+        const MIN_DAYS = 20; // 不足20天按20天计算
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            displayOriginalData();
+        });
+
+        // 显示原始数据
+        function displayOriginalData() {
+            const tbody = document.querySelector('#originalData tbody');
+            tbody.innerHTML = '';
+            
+            originalData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.type}</td>
+                    <td class="payment">${item.payment ? item.payment.toLocaleString('zh-CN', {minimumFractionDigits: 2}) : ''}</td>
+                    <td class="receipt">${item.receipt ? item.receipt.toLocaleString('zh-CN', {minimumFractionDigits: 2}) : ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 处理按钮点击事件
+        document.getElementById('processBtn').addEventListener('click', function() {
+            processFIFOMatching();
+        });
+
+        // 重置按钮点击事件
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            const matchedResultsTbody = document.querySelector('#matchedResults tbody');
+            matchedResultsTbody.innerHTML = '';
+            
+            const summaryDiv = document.getElementById('summary');
+            summaryDiv.innerHTML = '<p>点击"处理数据并计算"按钮开始匹配和计算</p>';
+        });
+
+        // 先进先出匹配算法
+        function processFIFOMatching() {
+            // 分离付款和回款
+            const payments = originalData
+                .filter(item => item.payment > 0)
+                .map(item => ({
+                    date: new Date(item.date),
+                    type: item.type,
+                    amount: item.payment,
+                    remaining: item.payment,
+                    originalDate: item.date
+                }));
+            
+            const receipts = originalData
+                .filter(item => item.receipt > 0)
+                .map(item => ({
+                    date: new Date(item.date),
+                    type: item.type,
+                    amount: item.receipt,
+                    remaining: item.receipt,
+                    originalDate: item.date
+                }));
+
+            // 匹配结果
+            const matches = [];
+            let matchId = 1;
+            
+            // 先进先出匹配
+            for (const receipt of receipts) {
+                let receiptRemaining = receipt.remaining;
+                
+                for (const payment of payments) {
+                    if (receiptRemaining <= 0) break;
+                    if (payment.remaining <= 0) continue;
+                    
+                    // 计算匹配金额
+                    const matchAmount = Math.min(payment.remaining, receiptRemaining);
+                    
+                    // 计算用款天数
+                    const days = Math.max(
+                        MIN_DAYS,
+                        Math.ceil((receipt.date - payment.date) / (1000 * 60 * 60 * 24))
+                    );
+                    
+                    // 计算利息
+                    const interest = matchAmount * DAILY_RATE * days;
+                    
+                    // 记录匹配
+                    matches.push({
+                        id: matchId++,
+                        paymentDate: payment.originalDate,
+                        receiptDate: receipt.originalDate,
+                        type: payment.type,
+                        amount: matchAmount,
+                        days: days,
+                        interest: interest
+                    });
+                    
+                    // 更新剩余金额
+                    payment.remaining -= matchAmount;
+                    receiptRemaining -= matchAmount;
+                    
+                    // 如果回款还有剩余，继续匹配下一笔付款
+                }
+            }
+            
+            // 显示匹配结果
+            displayMatchedResults(matches);
+            
+            // 显示汇总信息
+            displaySummary(matches);
+        }
+
+        // 显示匹配结果
+        function displayMatchedResults(matches) {
+            const tbody = document.querySelector('#matchedResults tbody');
+            tbody.innerHTML = '';
+            
+            matches.forEach(match => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${match.id}</td>
+                    <td>${match.paymentDate}</td>
+                    <td>${match.receiptDate}</td>
+                    <td>${match.type}</td>
+                    <td class="payment">${match.amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</td>
+                    <td>${match.days} 天</td>
+                    <td class="receipt">${match.interest.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 显示汇总信息
+        function displaySummary(matches) {
+            const totalMatched = matches.reduce((sum, match) => sum + match.amount, 0);
+            const totalInterest = matches.reduce((sum, match) => sum + match.interest, 0);
+            const avgDays = matches.reduce((sum, match) => sum + match.days, 0) / matches.length;
+            
+            // 计算付款总额和回款总额
+            const totalPayment = originalData.reduce((sum, item) => sum + item.payment, 0);
+            const totalReceipt = originalData.reduce((sum, item) => sum + item.receipt, 0);
+            
+            const summaryDiv = document.getElementById('summary');
+            summaryDiv.innerHTML = `
+                <h3>汇总信息</h3>
+                <p><strong>付款总额：</strong>¥ ${totalPayment.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                <p><strong>回款总额：</strong>¥ ${totalReceipt.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                <p><strong>已匹配金额：</strong>¥ ${totalMatched.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                <p><strong>匹配笔数：</strong>${matches.length} 笔</p>
+                <p><strong>平均用款天数：</strong>${avgDays.toFixed(1)} 天</p>
+                <p><strong>利息总额：</strong>¥ ${totalInterest.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                <p><strong>日利率：</strong>${(DAILY_RATE * 100).toFixed(5)}% (每月${(MONTHLY_RATE * 100)}%，每月${DAYS_PER_MONTH}天)</p>
+            `;
+        }
+    </script>
+</body>
+</html>
