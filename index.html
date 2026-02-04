@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>先进先出法付款回款匹配与利息计算</title>
+    <title>可编辑的先进先出法付款回款匹配系统</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,7 +18,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background-color: white;
             border-radius: 10px;
@@ -38,6 +38,12 @@
             color: #3498db;
             margin-top: 30px;
             margin-bottom: 15px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
         
         .data-section {
@@ -69,7 +75,7 @@
         }
         
         td {
-            padding: 12px 15px;
+            padding: 8px 10px;
             border-bottom: 1px solid #eaeaea;
         }
         
@@ -83,12 +89,10 @@
         
         .payment {
             color: #e74c3c;
-            font-weight: 600;
         }
         
         .receipt {
             color: #27ae60;
-            font-weight: 600;
         }
         
         .summary {
@@ -114,8 +118,8 @@
         
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-bottom: 25px;
         }
         
@@ -123,11 +127,14 @@
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         button:hover {
@@ -138,33 +145,213 @@
             transform: translateY(1px);
         }
         
+        .btn-primary {
+            background-color: #3498db;
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+        
         .footer {
             text-align: center;
             margin-top: 30px;
             color: #7f8c8d;
             font-size: 0.9em;
         }
+        
+        .editable-cell {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            min-width: 120px;
+        }
+        
+        .editable-cell:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .type-select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background-color: white;
+        }
+        
+        .row-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .row-action-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            background-color: #ecf0f1;
+            color: #34495e;
+            border: 1px solid #bdc3c7;
+        }
+        
+        .row-action-btn:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .data-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .input-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .form-col {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        @media (max-width: 768px) {
+            .data-section {
+                flex-direction: column;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>先进先出法付款回款匹配与利息计算</h1>
+        <h1><i class="fas fa-calculator"></i> 可编辑的先进先出法付款回款匹配系统</h1>
         
         <div class="controls">
-            <button id="processBtn">处理数据并计算</button>
-            <button id="resetBtn">重置</button>
+            <button id="processBtn" class="btn-primary">
+                <i class="fas fa-play-circle"></i> 处理数据并计算
+            </button>
+            <button id="resetBtn" class="btn-secondary">
+                <i class="fas fa-redo"></i> 重置数据
+            </button>
+            <button id="addRowBtn" class="btn-success">
+                <i class="fas fa-plus-circle"></i> 添加新行
+            </button>
+            <button id="exportBtn" class="btn-warning">
+                <i class="fas fa-download"></i> 导出匹配结果
+            </button>
+            <button id="importBtn" class="btn-secondary">
+                <i class="fas fa-upload"></i> 导入数据
+            </button>
+        </div>
+        
+        <div class="input-section">
+            <h3><i class="fas fa-edit"></i> 手动添加数据</h3>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="inputDate">日期</label>
+                        <input type="date" id="inputDate" value="2026-01-01">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="inputType">款项性质</label>
+                        <select id="inputType">
+                            <option value="货款">货款</option>
+                            <option value="履约保证金">履约保证金</option>
+                            <option value="港杂费包干费换单费">港杂费包干费换单费</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="inputPayment">支付金额</label>
+                        <input type="number" id="inputPayment" placeholder="输入支付金额" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="inputReceipt">回款金额</label>
+                        <input type="number" id="inputReceipt" placeholder="输入回款金额" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="form-col" style="display: flex; align-items: flex-end;">
+                    <button id="addFromFormBtn" class="btn-success" style="width: 100%;">
+                        <i class="fas fa-plus"></i> 添加到表格
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="data-section">
             <div class="data-table">
-                <h2>原始数据</h2>
+                <div class="data-actions">
+                    <h2><i class="fas fa-database"></i> 原始数据 (可编辑)</h2>
+                    <div>
+                        <span id="rowCount">0 行数据</span>
+                    </div>
+                </div>
                 <table id="originalData">
                     <thead>
                         <tr>
+                            <th>序号</th>
                             <th>支付/回款日期</th>
                             <th>款项性质</th>
                             <th>支付金额</th>
                             <th>回款金额</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -174,7 +361,12 @@
             </div>
             
             <div class="data-table">
-                <h2>匹配结果</h2>
+                <div class="data-actions">
+                    <h2><i class="fas fa-exchange-alt"></i> 匹配结果</h2>
+                    <div>
+                        <span id="matchCount">0 笔匹配</span>
+                    </div>
+                </div>
                 <table id="matchedResults">
                     <thead>
                         <tr>
@@ -199,33 +391,33 @@
         </div>
         
         <div class="interest-note">
-            <p><strong>利息计算说明：</strong></p>
+            <p><strong><i class="fas fa-info-circle"></i> 利息计算说明：</strong></p>
             <p>1. 利率：每月0.8%（默认每月30天，日利率 = 0.8% ÷ 30 ≈ 0.02667%）</p>
             <p>2. 计息规则：不足20天按20天计算</p>
             <p>3. 计算公式：利息 = 匹配金额 × 日利率 × 用款天数（若用款天数 < 20，则按20天计算）</p>
         </div>
         
         <div class="footer">
-            <p>© 2023 财务匹配计算系统 | 基于先进先出法（FIFO）</p>
+            <p><i class="far fa-copyright"></i> 2023 财务匹配计算系统 | 基于先进先出法（FIFO） | 数据可编辑版本</p>
         </div>
     </div>
 
     <script>
         // 原始数据
-        const originalData = [
-            { date: '2025/11/28', type: '履约保证金', payment: 0, receipt: 1000000.00 },
-            { date: '2025/12/24', type: '货款', payment: 2851192.44, receipt: 0 },
-            { date: '2025/12/26', type: '货款', payment: 3488232.85, receipt: 0 },
-            { date: '2025/12/29', type: '货款', payment: 4086640.54, receipt: 0 },
-            { date: '2025/12/30', type: '货款', payment: 3483495.85, receipt: 0 },
-            { date: '2026/1/4', type: '港杂费包干费换单费', payment: 548500.00, receipt: 0 },
-            { date: '2026/1/5', type: '货款', payment: 7900379.66, receipt: 0 },
-            { date: '2026/1/5', type: '履约保证金', payment: 1000000.00, receipt: 0 },
-            { date: '2026/1/19', type: '货款', payment: 0, receipt: 12270454.92 },
-            { date: '2026/1/27', type: '货款', payment: 2900000.00, receipt: 0 },
-            { date: '2026/1/28', type: '港杂费包干费换单费', payment: 19492.72, receipt: 0 },
-            { date: '2026/1/28', type: '货款', payment: 0, receipt: 10990000 },
-            { date: '2026/1/29', type: '货款', payment: 0, receipt: 6416450.98 }
+        let originalData = [
+            { date: '2025-11-28', type: '履约保证金', payment: 0, receipt: 1000000.00 },
+            { date: '2025-12-24', type: '货款', payment: 2851192.44, receipt: 0 },
+            { date: '2025-12-26', type: '货款', payment: 3488232.85, receipt: 0 },
+            { date: '2025-12-29', type: '货款', payment: 4086640.54, receipt: 0 },
+            { date: '2025-12-30', type: '货款', payment: 3483495.85, receipt: 0 },
+            { date: '2026-01-04', type: '港杂费包干费换单费', payment: 548500.00, receipt: 0 },
+            { date: '2026-01-05', type: '货款', payment: 7900379.66, receipt: 0 },
+            { date: '2026-01-05', type: '履约保证金', payment: 1000000.00, receipt: 0 },
+            { date: '2026-01-19', type: '货款', payment: 0, receipt: 12270454.92 },
+            { date: '2026-01-27', type: '货款', payment: 2900000.00, receipt: 0 },
+            { date: '2026-01-28', type: '港杂费包干费换单费', payment: 19492.72, receipt: 0 },
+            { date: '2026-01-28', type: '货款', payment: 0, receipt: 10990000 },
+            { date: '2026-01-29', type: '货款', payment: 0, receipt: 6416450.98 }
         ];
 
         // 利率参数
@@ -237,38 +429,241 @@
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
             displayOriginalData();
+            setupEventListeners();
         });
 
-        // 显示原始数据
+        // 设置事件监听器
+        function setupEventListeners() {
+            document.getElementById('processBtn').addEventListener('click', processFIFOMatching);
+            document.getElementById('resetBtn').addEventListener('click', resetData);
+            document.getElementById('addRowBtn').addEventListener('click', addEmptyRow);
+            document.getElementById('addFromFormBtn').addEventListener('click', addDataFromForm);
+            document.getElementById('exportBtn').addEventListener('click', exportResults);
+            document.getElementById('importBtn').addEventListener('click', importData);
+            
+            // 设置今天为默认日期
+            document.getElementById('inputDate').valueAsDate = new Date();
+        }
+
+        // 显示原始数据表格（可编辑）
         function displayOriginalData() {
             const tbody = document.querySelector('#originalData tbody');
             tbody.innerHTML = '';
             
-            originalData.forEach(item => {
+            originalData.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${item.date}</td>
-                    <td>${item.type}</td>
-                    <td class="payment">${item.payment ? item.payment.toLocaleString('zh-CN', {minimumFractionDigits: 2}) : ''}</td>
-                    <td class="receipt">${item.receipt ? item.receipt.toLocaleString('zh-CN', {minimumFractionDigits: 2}) : ''}</td>
+                    <td>${index + 1}</td>
+                    <td>
+                        <input type="date" class="editable-cell" value="${item.date}" data-field="date" data-index="${index}">
+                    </td>
+                    <td>
+                        <select class="type-select" data-field="type" data-index="${index}">
+                            <option value="货款" ${item.type === '货款' ? 'selected' : ''}>货款</option>
+                            <option value="履约保证金" ${item.type === '履约保证金' ? 'selected' : ''}>履约保证金</option>
+                            <option value="港杂费包干费换单费" ${item.type === '港杂费包干费换单费' ? 'selected' : ''}>港杂费包干费换单费</option>
+                            <option value="其他" ${item.type === '其他' ? 'selected' : ''}>其他</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" class="editable-cell payment" value="${item.payment}" data-field="payment" data-index="${index}" step="0.01" min="0">
+                    </td>
+                    <td>
+                        <input type="number" class="editable-cell receipt" value="${item.receipt}" data-field="receipt" data-index="${index}" step="0.01" min="0">
+                    </td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="row-action-btn delete-row" data-index="${index}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="row-action-btn move-up" data-index="${index}">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            <button class="row-action-btn move-down" data-index="${index}">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </td>
                 `;
                 tbody.appendChild(row);
             });
+            
+            // 更新行数显示
+            document.getElementById('rowCount').textContent = `${originalData.length} 行数据`;
+            
+            // 为编辑控件添加事件监听器
+            attachEditListeners();
         }
 
-        // 处理按钮点击事件
-        document.getElementById('processBtn').addEventListener('click', function() {
-            processFIFOMatching();
-        });
-
-        // 重置按钮点击事件
-        document.getElementById('resetBtn').addEventListener('click', function() {
-            const matchedResultsTbody = document.querySelector('#matchedResults tbody');
-            matchedResultsTbody.innerHTML = '';
+        // 为可编辑单元格添加事件监听器
+        function attachEditListeners() {
+            // 输入框变化事件
+            document.querySelectorAll('.editable-cell').forEach(input => {
+                input.addEventListener('change', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const field = this.getAttribute('data-field');
+                    let value = this.value;
+                    
+                    // 如果是数字字段，转换为浮点数
+                    if (field === 'payment' || field === 'receipt') {
+                        value = parseFloat(value) || 0;
+                    }
+                    
+                    // 更新数据
+                    originalData[index][field] = value;
+                    
+                    // 如果用户输入了日期，确保格式正确
+                    if (field === 'date' && value) {
+                        // 尝试将日期格式化为YYYY-MM-DD
+                        const dateObj = new Date(value);
+                        if (!isNaN(dateObj.getTime())) {
+                            const formattedDate = dateObj.toISOString().split('T')[0];
+                            originalData[index][field] = formattedDate;
+                            this.value = formattedDate;
+                        }
+                    }
+                });
+            });
             
-            const summaryDiv = document.getElementById('summary');
-            summaryDiv.innerHTML = '<p>点击"处理数据并计算"按钮开始匹配和计算</p>';
-        });
+            // 下拉框变化事件
+            document.querySelectorAll('.type-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const field = this.getAttribute('data-field');
+                    const value = this.value;
+                    
+                    originalData[index][field] = value;
+                });
+            });
+            
+            // 删除行按钮事件
+            document.querySelectorAll('.delete-row').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteRow(index);
+                });
+            });
+            
+            // 上移行按钮事件
+            document.querySelectorAll('.move-up').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (index > 0) {
+                        moveRow(index, index - 1);
+                    }
+                });
+            });
+            
+            // 下移行按钮事件
+            document.querySelectorAll('.move-down').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    if (index < originalData.length - 1) {
+                        moveRow(index, index + 1);
+                    }
+                });
+            });
+        }
+
+        // 删除行
+        function deleteRow(index) {
+            if (confirm('确定要删除这一行吗？')) {
+                originalData.splice(index, 1);
+                displayOriginalData();
+            }
+        }
+
+        // 移动行
+        function moveRow(fromIndex, toIndex) {
+            const item = originalData[fromIndex];
+            originalData.splice(fromIndex, 1);
+            originalData.splice(toIndex, 0, item);
+            displayOriginalData();
+        }
+
+        // 添加空行
+        function addEmptyRow() {
+            const today = new Date().toISOString().split('T')[0];
+            originalData.push({
+                date: today,
+                type: '货款',
+                payment: 0,
+                receipt: 0
+            });
+            displayOriginalData();
+            
+            // 滚动到表格底部
+            document.querySelector('#originalData tbody').lastElementChild.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+
+        // 从表单添加数据
+        function addDataFromForm() {
+            const dateInput = document.getElementById('inputDate');
+            const typeInput = document.getElementById('inputType');
+            const paymentInput = document.getElementById('inputPayment');
+            const receiptInput = document.getElementById('inputReceipt');
+            
+            const date = dateInput.value;
+            const type = typeInput.value;
+            const payment = parseFloat(paymentInput.value) || 0;
+            const receipt = parseFloat(receiptInput.value) || 0;
+            
+            // 检查至少有一个金额不为0
+            if (payment === 0 && receipt === 0) {
+                alert('支付金额和回款金额不能同时为0！');
+                return;
+            }
+            
+            originalData.push({
+                date: date,
+                type: type,
+                payment: payment,
+                receipt: receipt
+            });
+            
+            displayOriginalData();
+            
+            // 清空表单（除了日期和类型）
+            paymentInput.value = '';
+            receiptInput.value = '';
+            
+            // 聚焦到支付金额输入框
+            paymentInput.focus();
+        }
+
+        // 重置数据
+        function resetData() {
+            if (confirm('确定要重置所有数据吗？这将恢复为初始数据。')) {
+                originalData = [
+                    { date: '2025-11-28', type: '履约保证金', payment: 0, receipt: 1000000.00 },
+                    { date: '2025-12-24', type: '货款', payment: 2851192.44, receipt: 0 },
+                    { date: '2025-12-26', type: '货款', payment: 3488232.85, receipt: 0 },
+                    { date: '2025-12-29', type: '货款', payment: 4086640.54, receipt: 0 },
+                    { date: '2025-12-30', type: '货款', payment: 3483495.85, receipt: 0 },
+                    { date: '2026-01-04', type: '港杂费包干费换单费', payment: 548500.00, receipt: 0 },
+                    { date: '2026-01-05', type: '货款', payment: 7900379.66, receipt: 0 },
+                    { date: '2026-01-05', type: '履约保证金', payment: 1000000.00, receipt: 0 },
+                    { date: '2026-01-19', type: '货款', payment: 0, receipt: 12270454.92 },
+                    { date: '2026-01-27', type: '货款', payment: 2900000.00, receipt: 0 },
+                    { date: '2026-01-28', type: '港杂费包干费换单费', payment: 19492.72, receipt: 0 },
+                    { date: '2026-01-28', type: '货款', payment: 0, receipt: 10990000 },
+                    { date: '2026-01-29', type: '货款', payment: 0, receipt: 6416450.98 }
+                ];
+                
+                displayOriginalData();
+                
+                // 清空匹配结果
+                const matchedResultsTbody = document.querySelector('#matchedResults tbody');
+                matchedResultsTbody.innerHTML = '';
+                document.getElementById('matchCount').textContent = '0 笔匹配';
+                
+                const summaryDiv = document.getElementById('summary');
+                summaryDiv.innerHTML = '<p>点击"处理数据并计算"按钮开始匹配和计算</p>';
+            }
+        }
 
         // 先进先出匹配算法
         function processFIFOMatching() {
@@ -280,7 +675,8 @@
                     type: item.type,
                     amount: item.payment,
                     remaining: item.payment,
-                    originalDate: item.date
+                    originalDate: item.date,
+                    originalType: item.type
                 }));
             
             const receipts = originalData
@@ -290,8 +686,13 @@
                     type: item.type,
                     amount: item.receipt,
                     remaining: item.receipt,
-                    originalDate: item.date
+                    originalDate: item.date,
+                    originalType: item.type
                 }));
+
+            // 按日期排序
+            payments.sort((a, b) => a.date - b.date);
+            receipts.sort((a, b) => a.date - b.date);
 
             // 匹配结果
             const matches = [];
@@ -309,10 +710,8 @@
                     const matchAmount = Math.min(payment.remaining, receiptRemaining);
                     
                     // 计算用款天数
-                    const days = Math.max(
-                        MIN_DAYS,
-                        Math.ceil((receipt.date - payment.date) / (1000 * 60 * 60 * 24))
-                    );
+                    const daysDiff = Math.ceil((receipt.date - payment.date) / (1000 * 60 * 60 * 24));
+                    const days = Math.max(MIN_DAYS, daysDiff);
                     
                     // 计算利息
                     const interest = matchAmount * DAILY_RATE * days;
@@ -322,7 +721,7 @@
                         id: matchId++,
                         paymentDate: payment.originalDate,
                         receiptDate: receipt.originalDate,
-                        type: payment.type,
+                        type: payment.originalType,
                         amount: matchAmount,
                         days: days,
                         interest: interest
@@ -361,29 +760,168 @@
                 `;
                 tbody.appendChild(row);
             });
+            
+            // 更新匹配计数
+            document.getElementById('matchCount').textContent = `${matches.length} 笔匹配`;
         }
 
         // 显示汇总信息
         function displaySummary(matches) {
             const totalMatched = matches.reduce((sum, match) => sum + match.amount, 0);
             const totalInterest = matches.reduce((sum, match) => sum + match.interest, 0);
-            const avgDays = matches.reduce((sum, match) => sum + match.days, 0) / matches.length;
+            const avgDays = matches.length > 0 ? matches.reduce((sum, match) => sum + match.days, 0) / matches.length : 0;
             
             // 计算付款总额和回款总额
             const totalPayment = originalData.reduce((sum, item) => sum + item.payment, 0);
             const totalReceipt = originalData.reduce((sum, item) => sum + item.receipt, 0);
             
+            // 计算未匹配金额
+            const unmatchedPayment = totalPayment - totalMatched;
+            const unmatchedReceipt = totalReceipt - totalMatched;
+            
             const summaryDiv = document.getElementById('summary');
             summaryDiv.innerHTML = `
-                <h3>汇总信息</h3>
-                <p><strong>付款总额：</strong>¥ ${totalPayment.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
-                <p><strong>回款总额：</strong>¥ ${totalReceipt.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
-                <p><strong>已匹配金额：</strong>¥ ${totalMatched.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
-                <p><strong>匹配笔数：</strong>${matches.length} 笔</p>
-                <p><strong>平均用款天数：</strong>${avgDays.toFixed(1)} 天</p>
-                <p><strong>利息总额：</strong>¥ ${totalInterest.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
-                <p><strong>日利率：</strong>${(DAILY_RATE * 100).toFixed(5)}% (每月${(MONTHLY_RATE * 100)}%，每月${DAYS_PER_MONTH}天)</p>
+                <h3><i class="fas fa-chart-bar"></i> 汇总信息</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div style="background: #e8f4fc; padding: 15px; border-radius: 5px;">
+                        <p><strong>付款总额：</strong><br>¥ ${totalPayment.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div style="background: #e8f8f0; padding: 15px; border-radius: 5px;">
+                        <p><strong>回款总额：</strong><br>¥ ${totalReceipt.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div style="background: #fff9e6; padding: 15px; border-radius: 5px;">
+                        <p><strong>已匹配金额：</strong><br>¥ ${totalMatched.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div style="background: #ffe6e6; padding: 15px; border-radius: 5px;">
+                        <p><strong>利息总额：</strong><br>¥ ${totalInterest.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <p><strong>匹配笔数：</strong> ${matches.length} 笔</p>
+                        <p><strong>平均用款天数：</strong> ${avgDays.toFixed(1)} 天</p>
+                    </div>
+                    <div>
+                        <p><strong>未匹配付款：</strong> ¥ ${unmatchedPayment.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                        <p><strong>未匹配回款：</strong> ¥ ${unmatchedReceipt.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
+                    </div>
+                    <div>
+                        <p><strong>日利率：</strong> ${(DAILY_RATE * 100).toFixed(5)}%</p>
+                        <p><strong>月利率：</strong> ${(MONTHLY_RATE * 100)}% (每月${DAYS_PER_MONTH}天)</p>
+                    </div>
+                </div>
             `;
+        }
+
+        // 导出结果
+        function exportResults() {
+            // 获取匹配结果
+            const matches = [];
+            document.querySelectorAll('#matchedResults tbody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 7) {
+                    matches.push({
+                        序号: cells[0].textContent,
+                        付款日期: cells[1].textContent,
+                        回款日期: cells[2].textContent,
+                        款项性质: cells[3].textContent,
+                        匹配金额: cells[4].textContent,
+                        用款天数: cells[5].textContent,
+                        利息: cells[6].textContent
+                    });
+                }
+            });
+            
+            if (matches.length === 0) {
+                alert('没有匹配结果可以导出，请先处理数据！');
+                return;
+            }
+            
+            // 创建CSV内容
+            let csvContent = "序号,付款日期,回款日期,款项性质,匹配金额,用款天数,利息\n";
+            
+            matches.forEach(match => {
+                csvContent += `${match.序号},${match.付款日期},${match.回款日期},${match.款项性质},${match.匹配金额.replace(/,/g, '')},${match.用款天数},${match.利息.replace(/,/g, '')}\n`;
+            });
+            
+            // 创建下载链接
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `匹配结果_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 导入数据
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv,.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        
+                        // 尝试解析为JSON
+                        if (file.name.endsWith('.json')) {
+                            const data = JSON.parse(content);
+                            if (Array.isArray(data)) {
+                                originalData = data;
+                                displayOriginalData();
+                                alert(`成功导入 ${data.length} 条数据！`);
+                            } else {
+                                throw new Error('JSON格式不正确，应为数组');
+                            }
+                        } 
+                        // 尝试解析为CSV
+                        else if (file.name.endsWith('.csv')) {
+                            const lines = content.split('\n');
+                            const headers = lines[0].split(',').map(h => h.trim());
+                            
+                            const importedData = [];
+                            for (let i = 1; i < lines.length; i++) {
+                                const line = lines[i].trim();
+                                if (!line) continue;
+                                
+                                const values = line.split(',').map(v => v.trim());
+                                const item = {};
+                                
+                                // 检查是否有足够的列
+                                if (values.length >= 4) {
+                                    item.date = values[0];
+                                    item.type = values[1];
+                                    item.payment = parseFloat(values[2]) || 0;
+                                    item.receipt = parseFloat(values[3]) || 0;
+                                    importedData.push(item);
+                                }
+                            }
+                            
+                            if (importedData.length > 0) {
+                                originalData = importedData;
+                                displayOriginalData();
+                                alert(`成功导入 ${importedData.length} 条数据！`);
+                            } else {
+                                throw new Error('CSV文件格式不正确或为空');
+                            }
+                        }
+                    } catch (error) {
+                        alert(`导入失败: ${error.message}`);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
         }
     </script>
 </body>
