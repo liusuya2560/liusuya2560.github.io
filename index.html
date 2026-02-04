@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>可编辑的先进先出法付款回款匹配系统</title>
+    <title>先进先出法付款回款匹配系统 - 支持负天数不计息</title>
     <style>
         * {
             box-sizing: border-box;
@@ -43,6 +43,12 @@
         h3 {
             color: #2c3e50;
             margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        h4 {
+            color: #2c3e50;
+            margin-top: 15px;
             margin-bottom: 10px;
         }
         
@@ -93,6 +99,16 @@
         
         .receipt {
             color: #27ae60;
+        }
+        
+        .negative-days {
+            color: #e67e22;
+            font-weight: bold;
+        }
+        
+        .zero-interest {
+            color: #95a5a6;
+            font-style: italic;
         }
         
         .summary {
@@ -163,6 +179,10 @@
         
         .btn-secondary {
             background-color: #95a5a6;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8;
         }
         
         .footer {
@@ -256,6 +276,136 @@
             min-width: 200px;
         }
         
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .import-options {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        
+        .import-options label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .import-options input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .rate-settings {
+            background-color: #fff9e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #f39c12;
+        }
+        
+        .rate-settings h3 {
+            color: #f39c12;
+            margin-top: 0;
+        }
+        
+        .rate-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .rate-input {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .rate-input label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .rate-input input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .rate-input .unit {
+            margin-left: 5px;
+            color: #7f8c8d;
+        }
+        
+        .rate-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .calculated-rate {
+            background-color: #e8f4fc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .calculated-rate h4 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        
+        .calculated-rate p {
+            margin: 5px 0;
+        }
+        
+        .preset-rates {
+            margin-top: 15px;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .preset-btn {
+            padding: 8px 15px;
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .preset-btn:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .negative-days-warning {
+            background-color: #fff4e6;
+            border-left: 5px solid #e67e22;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .negative-days-warning h4 {
+            color: #e67e22;
+            margin-top: 0;
+        }
+        
         @media (max-width: 768px) {
             .data-section {
                 flex-direction: column;
@@ -269,13 +419,62 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .rate-inputs {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-calculator"></i> 可编辑的先进先出法付款回款匹配系统</h1>
+        <h1><i class="fas fa-calculator"></i> 先进先出法付款回款匹配系统 - 支持负天数不计息</h1>
+        
+        <div class="rate-settings">
+            <h3><i class="fas fa-percentage"></i> 利率参数设置</h3>
+            <div class="rate-inputs">
+                <div class="rate-input">
+                    <label for="monthlyRate">月利率 <span class="unit">(%)</span></label>
+                    <input type="number" id="monthlyRate" step="0.01" min="0" max="100" value="0.8">
+                </div>
+                <div class="rate-input">
+                    <label for="daysPerMonth">每月天数 <span class="unit">(天)</span></label>
+                    <input type="number" id="daysPerMonth" step="1" min="1" max="31" value="30">
+                </div>
+                <div class="rate-input">
+                    <label for="minDays">最低计息天数 <span class="unit">(天)</span></label>
+                    <input type="number" id="minDays" step="1" min="0" max="365" value="20">
+                </div>
+            </div>
+            
+            <div class="rate-actions">
+                <button id="updateRateBtn" class="btn-primary">
+                    <i class="fas fa-sync-alt"></i> 更新利率参数
+                </button>
+                <button id="saveRateBtn" class="btn-success">
+                    <i class="fas fa-save"></i> 保存设置
+                </button>
+                <button id="resetRateBtn" class="btn-secondary">
+                    <i class="fas fa-undo"></i> 恢复默认
+                </button>
+            </div>
+            
+            <div class="preset-rates">
+                <h4>预设利率方案：</h4>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-rate="0.8" data-days="30" data-min="20">常规 (月0.8%)</button>
+                    <button class="preset-btn" data-rate="1.0" data-days="30" data-min="20">较高 (月1.0%)</button>
+                    <button class="preset-btn" data-rate="0.5" data-days="30" data-min="20">较低 (月0.5%)</button>
+                    <button class="preset-btn" data-rate="0.8" data-days="31" data-min="20">按实际月天数</button>
+                    <button class="preset-btn" data-rate="0.8" data-days="30" data-min="0">无最低天数</button>
+                </div>
+            </div>
+            
+            <div class="calculated-rate" id="calculatedRate">
+                <!-- 计算后的利率信息将在这里显示 -->
+            </div>
+        </div>
         
         <div class="controls">
             <button id="processBtn" class="btn-primary">
@@ -294,6 +493,8 @@
                 <i class="fas fa-upload"></i> 导入数据
             </button>
         </div>
+        
+        <div class="error-message" id="errorMessage"></div>
         
         <div class="input-section">
             <h3><i class="fas fa-edit"></i> 手动添加数据</h3>
@@ -377,6 +578,7 @@
                             <th>匹配金额</th>
                             <th>用款天数</th>
                             <th>利息</th>
+                            <th>备注</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -390,15 +592,68 @@
             <!-- 汇总信息将通过JavaScript动态填充 -->
         </div>
         
+        <div class="negative-days-warning" id="negativeDaysWarning" style="display: none;">
+            <h4><i class="fas fa-exclamation-triangle"></i> 注意：负天数匹配记录</h4>
+            <p>以下匹配记录中，回款日期早于付款日期（用款天数为负数），这些记录不计利息：</p>
+            <ul id="negativeDaysList">
+                <!-- 负天数匹配记录将在这里显示 -->
+            </ul>
+        </div>
+        
         <div class="interest-note">
             <p><strong><i class="fas fa-info-circle"></i> 利息计算说明：</strong></p>
-            <p>1. 利率：每月0.8%（默认每月30天，日利率 = 0.8% ÷ 30 ≈ 0.02667%）</p>
-            <p>2. 计息规则：不足20天按20天计算</p>
-            <p>3. 计算公式：利息 = 匹配金额 × 日利率 × 用款天数（若用款天数 < 20，则按20天计算）</p>
+            <p>1. 日利率 = 月利率 ÷ 每月天数</p>
+            <p>2. 用款天数 = 回款日期 - 付款日期（按自然日计算）</p>
+            <p>3. <strong>特别规则：如果回款日期早于付款日期（用款天数为负数），则不计利息</strong></p>
+            <p>4. 对于正的天数：用款天数不足最低计息天数时，按最低计息天数计算</p>
+            <p>5. 计算公式：利息 = 匹配金额 × 日利率 × 用款天数（仅当用款天数 > 0）</p>
+            <p>6. 利率参数可以随时调整，调整后需要重新计算</p>
         </div>
         
         <div class="footer">
-            <p><i class="far fa-copyright"></i> 2023 财务匹配计算系统 | 基于先进先出法（FIFO） | 数据可编辑版本</p>
+            <p><i class="far fa-copyright"></i> 2023 财务匹配计算系统 | 基于先进先出法（FIFO） | 支持负天数不计息</p>
+        </div>
+    </div>
+
+    <!-- 导入数据模态框 -->
+    <div id="importModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background-color: white; padding: 30px; border-radius: 10px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <h2><i class="fas fa-upload"></i> 导入数据</h2>
+            
+            <div class="import-options">
+                <p><strong>选择导入格式：</strong></p>
+                <label>
+                    <input type="radio" name="importFormat" value="csv" checked> CSV格式 (逗号分隔)
+                </label>
+                <label>
+                    <input type="radio" name="importFormat" value="json"> JSON格式
+                </label>
+                
+                <div style="margin-top: 15px;">
+                    <p><strong>CSV格式说明：</strong></p>
+                    <p>CSV文件应包含以下列：</p>
+                    <ul style="margin-left: 20px;">
+                        <li>日期 (格式: YYYY-MM-DD)</li>
+                        <li>款项性质</li>
+                        <li>支付金额 (数字，可包含逗号)</li>
+                        <li>回款金额 (数字，可包含逗号)</li>
+                    </ul>
+                    <p style="margin-top: 10px; color: #666;">示例: "2025-12-24","货款","2,851,192.44","0"</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <input type="file" id="importFileInput" accept=".csv,.json" style="margin-bottom: 15px; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="cancelImportBtn" class="btn-secondary">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+                <button id="confirmImportBtn" class="btn-primary">
+                    <i class="fas fa-check"></i> 导入
+                </button>
+            </div>
         </div>
     </div>
 
@@ -420,29 +675,275 @@
             { date: '2026-01-29', type: '货款', payment: 0, receipt: 6416450.98 }
         ];
 
-        // 利率参数
-        const MONTHLY_RATE = 0.008; // 每月0.8%
-        const DAYS_PER_MONTH = 30;
-        const DAILY_RATE = MONTHLY_RATE / DAYS_PER_MONTH;
-        const MIN_DAYS = 20; // 不足20天按20天计算
+        // 利率参数（初始值，可以从本地存储加载）
+        let MONTHLY_RATE = 0.008; // 每月0.8%
+        let DAYS_PER_MONTH = 30;
+        let MIN_DAYS = 20; // 不足20天按20天计算
+        let DAILY_RATE = MONTHLY_RATE / DAYS_PER_MONTH;
+
+        // 工具函数：清理金额字符串，移除逗号等非数字字符
+        function cleanAmountString(amountStr) {
+            if (amountStr === null || amountStr === undefined || amountStr === '') {
+                return 0;
+            }
+            
+            // 如果是数字类型，直接返回
+            if (typeof amountStr === 'number') {
+                return amountStr;
+            }
+            
+            // 如果是字符串，移除所有逗号和非数字字符（除了小数点和负号）
+            const cleaned = amountStr.toString().replace(/,/g, '').replace(/[^\d.-]/g, '');
+            const num = parseFloat(cleaned);
+            
+            // 检查是否为有效的数字
+            if (isNaN(num)) {
+                console.warn(`无法解析金额: "${amountStr}"，已转换为0`);
+                return 0;
+            }
+            
+            return num;
+        }
+
+        // 工具函数：验证和格式化日期
+        function validateAndFormatDate(dateStr) {
+            if (!dateStr) {
+                return null;
+            }
+            
+            // 尝试解析日期
+            const date = new Date(dateStr);
+            
+            // 检查日期是否有效
+            if (isNaN(date.getTime())) {
+                console.warn(`无效的日期: "${dateStr}"`);
+                return null;
+            }
+            
+            // 返回YYYY-MM-DD格式
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}`;
+        }
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
+            // 从本地存储加载设置
+            loadSettings();
+            
+            // 初始化显示
             displayOriginalData();
+            updateRateDisplay();
             setupEventListeners();
+            setupImportModal();
         });
+
+        // 从本地存储加载设置
+        function loadSettings() {
+            try {
+                const savedSettings = localStorage.getItem('fifoRateSettings');
+                if (savedSettings) {
+                    const settings = JSON.parse(savedSettings);
+                    
+                    MONTHLY_RATE = settings.monthlyRate || 0.008;
+                    DAYS_PER_MONTH = settings.daysPerMonth || 30;
+                    MIN_DAYS = settings.minDays || 20;
+                    DAILY_RATE = MONTHLY_RATE / DAYS_PER_MONTH;
+                    
+                    // 更新输入框的值
+                    document.getElementById('monthlyRate').value = (MONTHLY_RATE * 100).toFixed(2);
+                    document.getElementById('daysPerMonth').value = DAYS_PER_MONTH;
+                    document.getElementById('minDays').value = MIN_DAYS;
+                }
+            } catch (error) {
+                console.error('加载设置失败:', error);
+                // 如果加载失败，使用默认值
+                resetRateToDefault();
+            }
+        }
+
+        // 保存设置到本地存储
+        function saveSettings() {
+            try {
+                const settings = {
+                    monthlyRate: MONTHLY_RATE,
+                    daysPerMonth: DAYS_PER_MONTH,
+                    minDays: MIN_DAYS
+                };
+                localStorage.setItem('fifoRateSettings', JSON.stringify(settings));
+                showError('利率参数已保存到本地存储！');
+            } catch (error) {
+                console.error('保存设置失败:', error);
+                showError('保存设置失败: ' + error.message);
+            }
+        }
+
+        // 更新利率参数
+        function updateRateParameters() {
+            const monthlyRateInput = parseFloat(document.getElementById('monthlyRate').value);
+            const daysPerMonthInput = parseInt(document.getElementById('daysPerMonth').value);
+            const minDaysInput = parseInt(document.getElementById('minDays').value);
+            
+            // 验证输入
+            let hasError = false;
+            
+            if (isNaN(monthlyRateInput) || monthlyRateInput < 0 || monthlyRateInput > 100) {
+                showError('月利率必须在0-100%之间');
+                hasError = true;
+            }
+            
+            if (isNaN(daysPerMonthInput) || daysPerMonthInput < 1 || daysPerMonthInput > 31) {
+                showError('每月天数必须在1-31天之间');
+                hasError = true;
+            }
+            
+            if (isNaN(minDaysInput) || minDaysInput < 0 || minDaysInput > 365) {
+                showError('最低计息天数必须在0-365天之间');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                return false;
+            }
+            
+            // 更新全局变量
+            MONTHLY_RATE = monthlyRateInput / 100; // 转换为小数
+            DAYS_PER_MONTH = daysPerMonthInput;
+            MIN_DAYS = minDaysInput;
+            DAILY_RATE = MONTHLY_RATE / DAYS_PER_MONTH;
+            
+            // 更新显示
+            updateRateDisplay();
+            
+            return true;
+        }
+
+        // 更新利率显示
+        function updateRateDisplay() {
+            const calculatedRateDiv = document.getElementById('calculatedRate');
+            calculatedRateDiv.innerHTML = `
+                <h4><i class="fas fa-calculator"></i> 当前利率参数</h4>
+                <p><strong>月利率：</strong>${(MONTHLY_RATE * 100).toFixed(2)}%</p>
+                <p><strong>每月天数：</strong>${DAYS_PER_MONTH} 天</p>
+                <p><strong>最低计息天数：</strong>${MIN_DAYS} 天（仅对正天数有效）</p>
+                <p><strong>日利率：</strong>${(DAILY_RATE * 100).toFixed(5)}%</p>
+                <p><strong>年化利率（估算）：</strong>${(MONTHLY_RATE * 12 * 100).toFixed(2)}%</p>
+                <p><strong>负天数处理：</strong>回款日期早于付款日期时，用款天数为负数，不计利息</p>
+            `;
+        }
+
+        // 重置利率为默认值
+        function resetRateToDefault() {
+            MONTHLY_RATE = 0.008; // 0.8%
+            DAYS_PER_MONTH = 30;
+            MIN_DAYS = 20;
+            DAILY_RATE = MONTHLY_RATE / DAYS_PER_MONTH;
+            
+            // 更新输入框
+            document.getElementById('monthlyRate').value = (MONTHLY_RATE * 100).toFixed(2);
+            document.getElementById('daysPerMonth').value = DAYS_PER_MONTH;
+            document.getElementById('minDays').value = MIN_DAYS;
+            
+            // 更新显示
+            updateRateDisplay();
+        }
 
         // 设置事件监听器
         function setupEventListeners() {
+            // 主功能按钮
             document.getElementById('processBtn').addEventListener('click', processFIFOMatching);
             document.getElementById('resetBtn').addEventListener('click', resetData);
             document.getElementById('addRowBtn').addEventListener('click', addEmptyRow);
             document.getElementById('addFromFormBtn').addEventListener('click', addDataFromForm);
             document.getElementById('exportBtn').addEventListener('click', exportResults);
-            document.getElementById('importBtn').addEventListener('click', importData);
+            document.getElementById('importBtn').addEventListener('click', showImportModal);
+            
+            // 利率相关按钮
+            document.getElementById('updateRateBtn').addEventListener('click', function() {
+                if (updateRateParameters()) {
+                    showError('利率参数已更新！');
+                }
+            });
+            
+            document.getElementById('saveRateBtn').addEventListener('click', function() {
+                if (updateRateParameters()) {
+                    saveSettings();
+                }
+            });
+            
+            document.getElementById('resetRateBtn').addEventListener('click', function() {
+                resetRateToDefault();
+                showError('利率参数已恢复为默认值！');
+            });
+            
+            // 预设利率按钮
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const rate = parseFloat(this.getAttribute('data-rate'));
+                    const days = parseInt(this.getAttribute('data-days'));
+                    const min = parseInt(this.getAttribute('data-min'));
+                    
+                    document.getElementById('monthlyRate').value = rate;
+                    document.getElementById('daysPerMonth').value = days;
+                    document.getElementById('minDays').value = min;
+                    
+                    if (updateRateParameters()) {
+                        showError(`已应用预设利率方案：月利率${rate}%，每月${days}天，最低计息${min}天`);
+                    }
+                });
+            });
             
             // 设置今天为默认日期
             document.getElementById('inputDate').valueAsDate = new Date();
+        }
+
+        // 设置导入模态框
+        function setupImportModal() {
+            const modal = document.getElementById('importModal');
+            const cancelBtn = document.getElementById('cancelImportBtn');
+            const confirmBtn = document.getElementById('confirmImportBtn');
+            const fileInput = document.getElementById('importFileInput');
+            
+            // 显示模态框
+            window.showImportModal = function() {
+                modal.style.display = 'flex';
+                fileInput.value = '';
+            };
+            
+            // 隐藏模态框
+            function hideModal() {
+                modal.style.display = 'none';
+            }
+            
+            // 取消导入
+            cancelBtn.addEventListener('click', hideModal);
+            
+            // 确认导入
+            confirmBtn.addEventListener('click', function() {
+                const file = fileInput.files[0];
+                if (!file) {
+                    showError('请选择要导入的文件');
+                    return;
+                }
+                
+                const format = document.querySelector('input[name="importFormat"]:checked').value;
+                importData(file, format);
+                hideModal();
+            });
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            
+            // 5秒后自动隐藏错误信息
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
         }
 
         // 显示原始数据表格（可编辑）
@@ -506,7 +1007,7 @@
                     
                     // 如果是数字字段，转换为浮点数
                     if (field === 'payment' || field === 'receipt') {
-                        value = parseFloat(value) || 0;
+                        value = cleanAmountString(value);
                     }
                     
                     // 更新数据
@@ -514,12 +1015,12 @@
                     
                     // 如果用户输入了日期，确保格式正确
                     if (field === 'date' && value) {
-                        // 尝试将日期格式化为YYYY-MM-DD
-                        const dateObj = new Date(value);
-                        if (!isNaN(dateObj.getTime())) {
-                            const formattedDate = dateObj.toISOString().split('T')[0];
+                        const formattedDate = validateAndFormatDate(value);
+                        if (formattedDate) {
                             originalData[index][field] = formattedDate;
                             this.value = formattedDate;
+                        } else {
+                            showError(`日期格式不正确: ${value}`);
                         }
                     }
                 });
@@ -608,17 +1109,24 @@
             
             const date = dateInput.value;
             const type = typeInput.value;
-            const payment = parseFloat(paymentInput.value) || 0;
-            const receipt = parseFloat(receiptInput.value) || 0;
+            const payment = cleanAmountString(paymentInput.value);
+            const receipt = cleanAmountString(receiptInput.value);
             
             // 检查至少有一个金额不为0
             if (payment === 0 && receipt === 0) {
-                alert('支付金额和回款金额不能同时为0！');
+                showError('支付金额和回款金额不能同时为0！');
+                return;
+            }
+            
+            // 验证日期
+            const formattedDate = validateAndFormatDate(date);
+            if (!formattedDate) {
+                showError(`日期格式不正确: ${date}`);
                 return;
             }
             
             originalData.push({
-                date: date,
+                date: formattedDate,
                 type: type,
                 payment: payment,
                 receipt: receipt
@@ -662,84 +1170,146 @@
                 
                 const summaryDiv = document.getElementById('summary');
                 summaryDiv.innerHTML = '<p>点击"处理数据并计算"按钮开始匹配和计算</p>';
+                
+                // 隐藏负天数警告
+                document.getElementById('negativeDaysWarning').style.display = 'none';
+                
+                // 隐藏错误信息
+                document.getElementById('errorMessage').classList.remove('show');
             }
         }
 
         // 先进先出匹配算法
         function processFIFOMatching() {
-            // 分离付款和回款
-            const payments = originalData
-                .filter(item => item.payment > 0)
-                .map(item => ({
-                    date: new Date(item.date),
-                    type: item.type,
-                    amount: item.payment,
-                    remaining: item.payment,
-                    originalDate: item.date,
-                    originalType: item.type
-                }));
-            
-            const receipts = originalData
-                .filter(item => item.receipt > 0)
-                .map(item => ({
-                    date: new Date(item.date),
-                    type: item.type,
-                    amount: item.receipt,
-                    remaining: item.receipt,
-                    originalDate: item.date,
-                    originalType: item.type
-                }));
-
-            // 按日期排序
-            payments.sort((a, b) => a.date - b.date);
-            receipts.sort((a, b) => a.date - b.date);
-
-            // 匹配结果
-            const matches = [];
-            let matchId = 1;
-            
-            // 先进先出匹配
-            for (const receipt of receipts) {
-                let receiptRemaining = receipt.remaining;
-                
-                for (const payment of payments) {
-                    if (receiptRemaining <= 0) break;
-                    if (payment.remaining <= 0) continue;
+            try {
+                // 验证数据
+                let hasInvalidData = false;
+                for (let i = 0; i < originalData.length; i++) {
+                    const item = originalData[i];
                     
-                    // 计算匹配金额
-                    const matchAmount = Math.min(payment.remaining, receiptRemaining);
+                    // 验证日期
+                    if (!validateAndFormatDate(item.date)) {
+                        showError(`第 ${i + 1} 行: 日期格式无效 (${item.date})`);
+                        hasInvalidData = true;
+                    }
                     
-                    // 计算用款天数
-                    const daysDiff = Math.ceil((receipt.date - payment.date) / (1000 * 60 * 60 * 24));
-                    const days = Math.max(MIN_DAYS, daysDiff);
-                    
-                    // 计算利息
-                    const interest = matchAmount * DAILY_RATE * days;
-                    
-                    // 记录匹配
-                    matches.push({
-                        id: matchId++,
-                        paymentDate: payment.originalDate,
-                        receiptDate: receipt.originalDate,
-                        type: payment.originalType,
-                        amount: matchAmount,
-                        days: days,
-                        interest: interest
-                    });
-                    
-                    // 更新剩余金额
-                    payment.remaining -= matchAmount;
-                    receiptRemaining -= matchAmount;
-                    
-                    // 如果回款还有剩余，继续匹配下一笔付款
+                    // 验证金额
+                    if (isNaN(cleanAmountString(item.payment)) || isNaN(cleanAmountString(item.receipt))) {
+                        showError(`第 ${i + 1} 行: 金额格式无效`);
+                        hasInvalidData = true;
+                    }
                 }
+                
+                if (hasInvalidData) {
+                    return;
+                }
+                
+                // 分离付款和回款
+                const payments = originalData
+                    .filter(item => cleanAmountString(item.payment) > 0)
+                    .map(item => ({
+                        date: new Date(item.date),
+                        type: item.type,
+                        amount: cleanAmountString(item.payment),
+                        remaining: cleanAmountString(item.payment),
+                        originalDate: item.date,
+                        originalType: item.type
+                    }));
+                
+                const receipts = originalData
+                    .filter(item => cleanAmountString(item.receipt) > 0)
+                    .map(item => ({
+                        date: new Date(item.date),
+                        type: item.type,
+                        amount: cleanAmountString(item.receipt),
+                        remaining: cleanAmountString(item.receipt),
+                        originalDate: item.date,
+                        originalType: item.type
+                    }));
+
+                // 按日期排序
+                payments.sort((a, b) => a.date - b.date);
+                receipts.sort((a, b) => a.date - b.date);
+
+                // 匹配结果
+                const matches = [];
+                let matchId = 1;
+                
+                // 负天数匹配记录
+                const negativeDaysMatches = [];
+                
+                // 先进先出匹配
+                for (const receipt of receipts) {
+                    let receiptRemaining = receipt.remaining;
+                    
+                    for (const payment of payments) {
+                        if (receiptRemaining <= 0) break;
+                        if (payment.remaining <= 0) continue;
+                        
+                        // 计算匹配金额
+                        const matchAmount = Math.min(payment.remaining, receiptRemaining);
+                        
+                        // 计算用款天数
+                        const daysDiff = Math.ceil((receipt.date - payment.date) / (1000 * 60 * 60 * 24));
+                        
+                        // 根据用款天数计算利息
+                        let days, interest, notes;
+                        
+                        if (daysDiff <= 0) {
+                            // 用款天数为负数或0，不计息
+                            days = daysDiff;
+                            interest = 0;
+                            notes = '回款日期早于付款日期，不计息';
+                            
+                            // 记录负天数匹配
+                            negativeDaysMatches.push({
+                                id: matchId,
+                                paymentDate: payment.originalDate,
+                                receiptDate: receipt.originalDate,
+                                amount: matchAmount,
+                                days: daysDiff
+                            });
+                        } else {
+                            // 用款天数为正数，正常计息
+                            days = Math.max(MIN_DAYS, daysDiff);
+                            interest = matchAmount * DAILY_RATE * days;
+                            notes = '';
+                        }
+                        
+                        // 记录匹配
+                        matches.push({
+                            id: matchId++,
+                            paymentDate: payment.originalDate,
+                            receiptDate: receipt.originalDate,
+                            type: payment.originalType,
+                            amount: matchAmount,
+                            days: days,
+                            interest: interest,
+                            notes: notes
+                        });
+                        
+                        // 更新剩余金额
+                        payment.remaining -= matchAmount;
+                        receiptRemaining -= matchAmount;
+                    }
+                }
+                
+                // 显示匹配结果
+                displayMatchedResults(matches);
+                
+                // 显示汇总信息
+                displaySummary(matches);
+                
+                // 显示负天数警告（如果有负天数匹配）
+                displayNegativeDaysWarning(negativeDaysMatches);
+                
+                // 隐藏错误信息
+                document.getElementById('errorMessage').classList.remove('show');
+                
+            } catch (error) {
+                console.error('处理数据时发生错误:', error);
+                showError(`处理数据时发生错误: ${error.message}`);
             }
-            
-            // 显示匹配结果
-            displayMatchedResults(matches);
-            
-            // 显示汇总信息
-            displaySummary(matches);
         }
 
         // 显示匹配结果
@@ -749,14 +1319,21 @@
             
             matches.forEach(match => {
                 const row = document.createElement('tr');
+                
+                // 判断用款天数是否为负数或0
+                const isNegativeOrZero = match.days <= 0;
+                const daysClass = isNegativeOrZero ? 'negative-days' : '';
+                const interestClass = isNegativeOrZero ? 'zero-interest' : 'receipt';
+                
                 row.innerHTML = `
                     <td>${match.id}</td>
                     <td>${match.paymentDate}</td>
                     <td>${match.receiptDate}</td>
                     <td>${match.type}</td>
                     <td class="payment">${match.amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</td>
-                    <td>${match.days} 天</td>
-                    <td class="receipt">${match.interest.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</td>
+                    <td class="${daysClass}">${match.days} 天</td>
+                    <td class="${interestClass}">${match.interest.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</td>
+                    <td>${match.notes || ''}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -765,19 +1342,47 @@
             document.getElementById('matchCount').textContent = `${matches.length} 笔匹配`;
         }
 
+        // 显示负天数警告
+        function displayNegativeDaysWarning(negativeDaysMatches) {
+            const warningDiv = document.getElementById('negativeDaysWarning');
+            const listDiv = document.getElementById('negativeDaysList');
+            
+            if (negativeDaysMatches.length > 0) {
+                listDiv.innerHTML = '';
+                
+                negativeDaysMatches.forEach(match => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `匹配#${match.id}: 付款日期 ${match.paymentDate} → 回款日期 ${match.receiptDate}，用款天数 ${match.days} 天，金额 ¥${match.amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}`;
+                    listDiv.appendChild(li);
+                });
+                
+                warningDiv.style.display = 'block';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+        }
+
         // 显示汇总信息
         function displaySummary(matches) {
             const totalMatched = matches.reduce((sum, match) => sum + match.amount, 0);
             const totalInterest = matches.reduce((sum, match) => sum + match.interest, 0);
-            const avgDays = matches.length > 0 ? matches.reduce((sum, match) => sum + match.days, 0) / matches.length : 0;
+            
+            // 计算正天数匹配的用款天数平均值
+            const positiveDaysMatches = matches.filter(match => match.days > 0);
+            const avgDays = positiveDaysMatches.length > 0 ? 
+                positiveDaysMatches.reduce((sum, match) => sum + match.days, 0) / positiveDaysMatches.length : 0;
             
             // 计算付款总额和回款总额
-            const totalPayment = originalData.reduce((sum, item) => sum + item.payment, 0);
-            const totalReceipt = originalData.reduce((sum, item) => sum + item.receipt, 0);
+            const totalPayment = originalData.reduce((sum, item) => sum + cleanAmountString(item.payment), 0);
+            const totalReceipt = originalData.reduce((sum, item) => sum + cleanAmountString(item.receipt), 0);
             
             // 计算未匹配金额
             const unmatchedPayment = totalPayment - totalMatched;
             const unmatchedReceipt = totalReceipt - totalMatched;
+            
+            // 计算正天数匹配数量
+            const positiveMatchesCount = matches.filter(match => match.days > 0).length;
+            const negativeOrZeroMatchesCount = matches.filter(match => match.days <= 0).length;
             
             const summaryDiv = document.getElementById('summary');
             summaryDiv.innerHTML = `
@@ -799,15 +1404,18 @@
                 <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 15px;">
                     <div>
                         <p><strong>匹配笔数：</strong> ${matches.length} 笔</p>
-                        <p><strong>平均用款天数：</strong> ${avgDays.toFixed(1)} 天</p>
+                        <p><strong>正天数匹配：</strong> ${positiveMatchesCount} 笔</p>
+                        <p><strong>负/零天数匹配：</strong> ${negativeOrZeroMatchesCount} 笔（不计息）</p>
                     </div>
                     <div>
+                        <p><strong>平均用款天数（正天数）：</strong> ${avgDays.toFixed(1)} 天</p>
                         <p><strong>未匹配付款：</strong> ¥ ${unmatchedPayment.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
                         <p><strong>未匹配回款：</strong> ¥ ${unmatchedReceipt.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</p>
                     </div>
                     <div>
-                        <p><strong>日利率：</strong> ${(DAILY_RATE * 100).toFixed(5)}%</p>
-                        <p><strong>月利率：</strong> ${(MONTHLY_RATE * 100)}% (每月${DAYS_PER_MONTH}天)</p>
+                        <p><strong>当前日利率：</strong> ${(DAILY_RATE * 100).toFixed(5)}%</p>
+                        <p><strong>当前月利率：</strong> ${(MONTHLY_RATE * 100).toFixed(2)}% (每月${DAYS_PER_MONTH}天)</p>
+                        <p><strong>最低计息天数：</strong> ${MIN_DAYS} 天（仅对正天数有效）</p>
                     </div>
                 </div>
             `;
@@ -819,7 +1427,7 @@
             const matches = [];
             document.querySelectorAll('#matchedResults tbody tr').forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length >= 7) {
+                if (cells.length >= 8) {
                     matches.push({
                         序号: cells[0].textContent,
                         付款日期: cells[1].textContent,
@@ -827,21 +1435,26 @@
                         款项性质: cells[3].textContent,
                         匹配金额: cells[4].textContent,
                         用款天数: cells[5].textContent,
-                        利息: cells[6].textContent
+                        利息: cells[6].textContent,
+                        备注: cells[7].textContent
                     });
                 }
             });
             
             if (matches.length === 0) {
-                alert('没有匹配结果可以导出，请先处理数据！');
+                showError('没有匹配结果可以导出，请先处理数据！');
                 return;
             }
             
             // 创建CSV内容
-            let csvContent = "序号,付款日期,回款日期,款项性质,匹配金额,用款天数,利息\n";
+            let csvContent = "序号,付款日期,回款日期,款项性质,匹配金额,用款天数(天),利息,备注\n";
+            
+            // 添加利率参数信息
+            csvContent += `# 利率参数: 月利率${(MONTHLY_RATE * 100).toFixed(2)}%, 每月${DAYS_PER_MONTH}天, 最低计息${MIN_DAYS}天, 日利率${(DAILY_RATE * 100).toFixed(5)}%\n`;
+            csvContent += `# 负天数处理规则: 回款日期早于付款日期时（用款天数为负数），不计利息\n`;
             
             matches.forEach(match => {
-                csvContent += `${match.序号},${match.付款日期},${match.回款日期},${match.款项性质},${match.匹配金额.replace(/,/g, '')},${match.用款天数},${match.利息.replace(/,/g, '')}\n`;
+                csvContent += `${match.序号},${match.付款日期},${match.回款日期},${match.款项性质},${match.匹配金额.replace(/,/g, '')},${match.用款天数},${match.利息.replace(/,/g, '')},"${match.备注}"\n`;
             });
             
             // 创建下载链接
@@ -849,79 +1462,191 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.setAttribute('href', url);
-            link.setAttribute('download', `匹配结果_${new Date().toISOString().slice(0, 10)}.csv`);
+            const dateStr = new Date().toISOString().slice(0, 10);
+            link.setAttribute('download', `匹配结果_${dateStr}_利率${(MONTHLY_RATE * 100).toFixed(2)}%.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
+        // 显示导入模态框
+        function showImportModal() {
+            window.showImportModal();
+        }
+
         // 导入数据
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.csv,.json';
+        function importData(file, format) {
+            const reader = new FileReader();
             
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const content = e.target.result;
-                        
-                        // 尝试解析为JSON
-                        if (file.name.endsWith('.json')) {
-                            const data = JSON.parse(content);
-                            if (Array.isArray(data)) {
-                                originalData = data;
-                                displayOriginalData();
-                                alert(`成功导入 ${data.length} 条数据！`);
-                            } else {
-                                throw new Error('JSON格式不正确，应为数组');
-                            }
-                        } 
-                        // 尝试解析为CSV
-                        else if (file.name.endsWith('.csv')) {
-                            const lines = content.split('\n');
-                            const headers = lines[0].split(',').map(h => h.trim());
-                            
-                            const importedData = [];
-                            for (let i = 1; i < lines.length; i++) {
-                                const line = lines[i].trim();
-                                if (!line) continue;
-                                
-                                const values = line.split(',').map(v => v.trim());
-                                const item = {};
-                                
-                                // 检查是否有足够的列
-                                if (values.length >= 4) {
-                                    item.date = values[0];
-                                    item.type = values[1];
-                                    item.payment = parseFloat(values[2]) || 0;
-                                    item.receipt = parseFloat(values[3]) || 0;
-                                    importedData.push(item);
-                                }
-                            }
-                            
-                            if (importedData.length > 0) {
-                                originalData = importedData;
-                                displayOriginalData();
-                                alert(`成功导入 ${importedData.length} 条数据！`);
-                            } else {
-                                throw new Error('CSV文件格式不正确或为空');
-                            }
-                        }
-                    } catch (error) {
-                        alert(`导入失败: ${error.message}`);
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    let importedData = [];
+                    
+                    if (format === 'csv') {
+                        importedData = parseCSV(content);
+                    } else if (format === 'json') {
+                        importedData = parseJSON(content);
                     }
-                };
-                
-                reader.readAsText(file);
+                    
+                    if (importedData.length > 0) {
+                        originalData = importedData;
+                        displayOriginalData();
+                        
+                        // 清空匹配结果
+                        const matchedResultsTbody = document.querySelector('#matchedResults tbody');
+                        matchedResultsTbody.innerHTML = '';
+                        document.getElementById('matchCount').textContent = '0 笔匹配';
+                        
+                        // 隐藏负天数警告
+                        document.getElementById('negativeDaysWarning').style.display = 'none';
+                        
+                        const summaryDiv = document.getElementById('summary');
+                        summaryDiv.innerHTML = '<p>数据已导入，请点击"处理数据并计算"按钮开始匹配和计算</p>';
+                        
+                        showError(`成功导入 ${importedData.length} 条数据！`);
+                    } else {
+                        showError('导入失败：未找到有效数据');
+                    }
+                } catch (error) {
+                    console.error('导入数据时发生错误:', error);
+                    showError(`导入失败: ${error.message}`);
+                }
             };
             
-            input.click();
+            reader.onerror = function() {
+                showError('读取文件时发生错误');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // 解析CSV数据
+        function parseCSV(content) {
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            if (lines.length < 2) {
+                throw new Error('CSV文件内容为空或格式不正确');
+            }
+            
+            const importedData = [];
+            
+            // 检查是否有标题行
+            let startIndex = 0;
+            const firstLine = lines[0].toLowerCase();
+            if (firstLine.includes('date') || firstLine.includes('日期') || 
+                firstLine.includes('payment') || firstLine.includes('支付')) {
+                // 有标题行，跳过
+                startIndex = 1;
+            }
+            
+            for (let i = startIndex; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // 处理CSV行，考虑引号和逗号
+                let values = [];
+                let inQuotes = false;
+                let currentValue = '';
+                
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    
+                    if (char === '"' || char === "'") {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                
+                // 添加最后一个值
+                values.push(currentValue.trim());
+                
+                // 清理值中的引号
+                values = values.map(v => v.replace(/^["']|["']$/g, ''));
+                
+                // 检查是否有足够的列
+                if (values.length >= 4) {
+                    const date = validateAndFormatDate(values[0]);
+                    if (!date) {
+                        console.warn(`跳过第 ${i + 1} 行: 无效日期 "${values[0]}"`);
+                        continue;
+                    }
+                    
+                    const type = values[1] || '货款';
+                    const payment = cleanAmountString(values[2]);
+                    const receipt = cleanAmountString(values[3]);
+                    
+                    // 检查至少有一个金额不为0
+                    if (payment === 0 && receipt === 0) {
+                        console.warn(`跳过第 ${i + 1} 行: 支付和回款金额同时为0`);
+                        continue;
+                    }
+                    
+                    importedData.push({
+                        date: date,
+                        type: type,
+                        payment: payment,
+                        receipt: receipt
+                    });
+                } else {
+                    console.warn(`跳过第 ${i + 1} 行: 列数不足`);
+                }
+            }
+            
+            return importedData;
+        }
+
+        // 解析JSON数据
+        function parseJSON(content) {
+            let data;
+            try {
+                data = JSON.parse(content);
+            } catch (error) {
+                throw new Error('JSON格式不正确');
+            }
+            
+            if (!Array.isArray(data)) {
+                throw new Error('JSON数据应为数组格式');
+            }
+            
+            const importedData = [];
+            
+            data.forEach((item, index) => {
+                // 验证必需字段
+                if (!item.date && !item.支付日期) {
+                    console.warn(`跳过第 ${index + 1} 条数据: 缺少日期字段`);
+                    return;
+                }
+                
+                const date = validateAndFormatDate(item.date || item.支付日期 || item.日期);
+                if (!date) {
+                    console.warn(`跳过第 ${index + 1} 条数据: 无效日期`);
+                    return;
+                }
+                
+                const type = item.type || item.款项性质 || item.类型 || '货款';
+                const payment = cleanAmountString(item.payment || item.支付金额 || item.pay || 0);
+                const receipt = cleanAmountString(item.receipt || item.回款金额 || item.receive || 0);
+                
+                // 检查至少有一个金额不为0
+                if (payment === 0 && receipt === 0) {
+                    console.warn(`跳过第 ${index + 1} 条数据: 支付和回款金额同时为0`);
+                    return;
+                }
+                
+                importedData.push({
+                    date: date,
+                    type: type,
+                    payment: payment,
+                    receipt: receipt
+                });
+            });
+            
+            return importedData;
         }
     </script>
 </body>
