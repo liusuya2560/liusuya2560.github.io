@@ -1,17 +1,3 @@
-<script>
-// 设置你的专属密码（把下面的 123456 改成你想要的密码）
-var correctPassword = "mytool@2026lsy";
-
-// 弹出输入框让访客输密码
-var userPassword = prompt("请输入访问密码：");
-
-// 如果没输密码或密码错误，直接清空页面
-if (userPassword !== correctPassword) {
-    document.body.innerHTML = "<h1 style='text-align:center;margin-top:100px;color:#999;'>🔒 访问受限，请联系管理员</h1>";
-    document.title = "访问被拒绝";
-} 
-// 如果密码正确，页面正常显示（什么都不做）
-</script>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -625,7 +611,7 @@ if (userPassword !== correctPassword) {
         </div>
         
         <div class="footer">
-            <p><i class="far fa-copyright"></i> 2025-2026 suya. 财务匹配计算系统 | 基于先进先出法（FIFO） | 支持负天数不计息</p>
+            <p><i class="far fa-copyright"></i> 2025-2026 刘素雅.All Rights Reserved. 财务匹配计算系统 | 基于先进先出法（FIFO） | 支持负天数不计息</p>
         </div>
     </div>
 
@@ -1663,5 +1649,32 @@ if (userPassword !== correctPassword) {
             return importedData;
         }
     </script>
+<script>
+(function() {
+    // ===== 密码设置 =====
+    var CORRECT_PASSWORD = "mytool@2026";
+    
+    // 弹出密码框
+    var userInput = prompt("🔐 请输入访问密码：");
+    var isAuthorized = (userInput !== null && userInput.trim() === CORRECT_PASSWORD);
+    
+    if (isAuthorized) {
+        // 密码正确 → 显示页面
+        document.body.style.display = "block";
+    } else {
+        // 密码错误 → 彻底清空并显示拒绝信息
+        document.body.innerHTML = `
+            <div style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#f5f5f5;font-family:sans-serif;">
+                <div style="text-align:center;padding:40px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+                    <div style="font-size:64px;margin-bottom:20px;">🔒</div>
+                    <h1 style="color:#333;font-size:24px;margin:0;">访问受限</h1>
+                    <p style="color:#999;font-size:14px;margin-top:10px;">密码错误或未输入，请联系管理员</p>
+                </div>
+            </div>
+        `;
+        document.body.style.display = "block"; // 显示拒绝界面
+    }
+})();
+</script>
 </body>
 </html>
