@@ -1,3 +1,17 @@
+<script>
+// 设置你的专属密码（把下面的 123456 改成你想要的密码）
+var correctPassword = "mytool@2026lsy";
+
+// 弹出输入框让访客输密码
+var userPassword = prompt("请输入访问密码：");
+
+// 如果没输密码或密码错误，直接清空页面
+if (userPassword !== correctPassword) {
+    document.body.innerHTML = "<h1 style='text-align:center;margin-top:100px;color:#999;'>🔒 访问受限，请联系管理员</h1>";
+    document.title = "访问被拒绝";
+} 
+// 如果密码正确，页面正常显示（什么都不做）
+</script>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -611,7 +625,7 @@
         </div>
         
         <div class="footer">
-            <p><i class="far fa-copyright"></i> 财务匹配计算系统 | 基于先进先出法（FIFO） | 支持负天数不计息</p>
+            <p><i class="far fa-copyright"></i> 2025-2026 suya. 财务匹配计算系统 | 基于先进先出法（FIFO） | 支持负天数不计息</p>
         </div>
     </div>
 
